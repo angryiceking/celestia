@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>MongoDB Visualization Report App</title>
+
+    <!-- CSS goes here -->
+    <link href="{% static 'css/normalize.css' %}" rel="stylesheet">
+    <link href="{% static 'css/milligram.min.css' %}" rel="stylesheet">
+
+    <!-- JQuery and Chartjs plugin along with custom js -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/Chart.min.js' %}"></script>
+    <script src="{% static 'js/display-chart.js' %}"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="column column-80 column-offset-10" style="margin-top: 50px;">
+                <h4>MongoDB Visualization Report App</h4>
+            </div>
+        </div>
+        <div class="row">
+            <div class="column column-80 column-offset-10" style="margin-top: 30px;">
+                <div class="row">
+                    <div class="column column-40">
+                        <h6>Here's the distribution of the data from logs.</h6>
+                        {% for d in data %}
+                            {{ d }}
+                        {% endfor %}
+                    </div>
+                    <div class="column column-60">
+                        <canvas id="myChart" width="400" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>
