@@ -4,23 +4,22 @@ client = MongoClient("mongodb://guest:Z8zDntK3aC0l@54.251.133.139:27017/?authSou
 db = client["logs_db"]
 col = db["logs"]
 
-final_data = {
-    "1:05": {
-        "success": 0,
-        "error": 0
-    },
-    "1:10": {
-        "success": 0,
-        "error": 0
-    },
-    "1:15": {
-        "success": 0,
-        "error": 0
-    }
-}
-
 # manually process the data using python.
 def manual_process():
+    final_data = {
+        "1:05": {
+            "success": 0,
+            "error": 0
+        },
+        "1:10": {
+            "success": 0,
+            "error": 0
+        },
+        "1:15": {
+            "success": 0,
+            "error": 0
+        }
+    }
     # query to get all data
     data = col.find({})
     # get start_date for initial checking.
