@@ -6,6 +6,13 @@ client = MongoClient("mongodb://guest:Z8zDntK3aC0l@54.251.133.139:27017/?authSou
 db = client["logs_db"]
 col = db["logs"]
 
+# function to convert timestamp from mongodb query.
+def convert_timestamp_to_date(timestamp):
+    timestamp = datetime.datetime.utcfromtimestamp(int(timestamp)/1000)
+    converted_timestamp = timestamp.strftime('%Y-%m-%d %H:%M')
+
+    return converted_timestamp
+
 # manually process the data using python.
 def process_query(custom_minutes):
     print(f'custom minutes: {custom_minutes}')
@@ -46,14 +53,12 @@ def process_query(custom_minutes):
     resultset = {}
     # set first nest for intervals
     for d in columns:
-        timestamp = datetime.datetime.utcfromtimestamp(int(d['_id']['interval'])/1000)
-        converted_timestamp = timestamp.strftime('%Y-%m-%d %H:%M')
+        converted_timestamp = convert_timestamp_to_date(d['_id']['interval'])
         resultset[converted_timestamp] = {}
         
     # set second nest for values per intervals
     for d in columns:
-        timestamp = datetime.datetime.utcfromtimestamp(int(d['_id']['interval'])/1000)
-        converted_timestamp = timestamp.strftime('%Y-%m-%d %H:%M')
+        converted_timestamp = convert_timestamp_to_date(d['_id']['interval'])
         if converted_timestamp in resultset:
             if d['status'] == 'success':
                 resultset[converted_timestamp]['success'] = d['count']
