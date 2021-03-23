@@ -30,7 +30,8 @@ data = col.aggregate([
     }},
     {
         "$unwind": "$status"
-    }
+    },
+    { "$sort" : { "_id.interval" : -1 } }
 ])
 
 columns = list(data)

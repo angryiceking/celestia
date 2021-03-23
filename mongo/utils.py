@@ -31,7 +31,8 @@ def process_query(custom_minutes):
         }},
         {
             "$unwind": "$status"
-        }
+        },
+        { "$sort" : { "_id.interval" : 1 } }
     ])
 
     # to make list iterable
