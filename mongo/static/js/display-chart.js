@@ -1,4 +1,10 @@
 $(document).ready(function (e) {
+    $('#myTable').DataTable({
+        "lengthChange": false,
+        "searching": false,
+        "paging": false,
+        "info": false
+    });
 
     function visualize(result) {
         console.log(result)

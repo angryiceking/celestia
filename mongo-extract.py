@@ -18,10 +18,13 @@ data = col.aggregate([
     { "$group": {
         "_id": {
             "interval": {
-                "$subtract": [ 
-                  { "$minute": "$created_at" },
-                  { "$mod": [{ "$minute": "$created_at"}, custom_minutes] }
-                ]
+                "$subtract": [
+                    { "$subtract": [ "$created_at", datetime.datetime(1970, 1, 1) ] },
+                    { "$mod": [
+                        { "$subtract": [ "$created_at", datetime.datetime(1970, 1, 1) ] },
+                        1000 * 60 * custom_minutes
+                    ]}
+                ],
               },
             "status": "$status",
         },
@@ -39,14 +42,18 @@ columns = list(data)
 # print(columns)
 mylist = {}
 for d in columns:
-    mylist[d['_id']['interval']] = {}
+    timestamp = datetime.datetime.utcfromtimestamp(int(d['_id']['interval'])/1000)
+    converted_timestamp = timestamp.strftime('%Y-%m-%d %H:%M:%S')
+    mylist[converted_timestamp] = {}
 
 print(mylist)
 for d in columns:
-    if d['_id']['interval'] in mylist:
+    timestamp = datetime.datetime.utcfromtimestamp(int(d['_id']['interval'])/1000)
+    converted_timestamp = timestamp.strftime('%Y-%m-%d %H:%M:%S')
+    if converted_timestamp in mylist:
         if d['status'] == 'success':
-            mylist[d['_id']['interval']]['success'] = d['count']
+            mylist[converted_timestamp]['success'] = d['count']
         if d['status'] == 'error':
-            mylist[d['_id']['interval']]['error'] = d['count']
+            mylist[converted_timestamp]['error'] = d['count']
 
 print(mylist)

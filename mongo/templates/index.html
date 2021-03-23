@@ -14,10 +14,13 @@
     <!-- CSS goes here -->
     <link href="{% static 'css/normalize.css' %}" rel="stylesheet">
     <link href="{% static 'css/milligram.min.css' %}" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css" rel="stylesheet">
+
 
     <!-- JQuery and Chartjs plugin along with custom js -->
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/Chart.min.js' %}"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script src="{% static 'js/display-chart.js' %}"></script>
 </head>
 <body>
@@ -29,11 +32,12 @@
             </div>
         </div>
         <div class="row">
-            <div class="column column-80 column-offset-10" style="margin-top: 30px;">
+            <div class="column" style="margin-top: 30px;">
                 <div class="row">
                     <div class="column column-40">
-                        <h6>Here's the distribution of the data from logs</h6>
-                        <table>
+                        <h6>Here's the distribution of the data from logs with {{ minute }} minute(s) interval.</h6>
+                        <hr/>
+                        <table id="myTable">
                             <thead>
                                 <tr>
                                     <th>Time</th>
@@ -44,7 +48,7 @@
                             <tbody>
                             {% for key,value in data.items %}
                                 <tr>
-                                    <td>within {{ key }} mins</td>
+                                    <td>{{ key }}</td>
                                     <td>{{ value.success }}</td>
                                     <td>{{ value.error }}</td>
                                 </tr>

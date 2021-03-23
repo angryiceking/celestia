@@ -1,4 +1,6 @@
 from pymongo import MongoClient
+import datetime
+
 
 client = MongoClient("mongodb://guest:Z8zDntK3aC0l@54.251.133.139:27017/?authSource=logs_db")
 db = client["logs_db"]
@@ -19,10 +21,13 @@ def process_query(custom_minutes):
         { "$group": {
             "_id": {
                 "interval": {
-                    "$subtract": [ 
-                    { "$minute": "$created_at" },
-                    { "$mod": [{ "$minute": "$created_at"}, custom_minutes] }
-                    ]
+                    "$subtract": [
+                        { "$subtract": [ "$created_at", datetime.datetime(1970, 1, 1) ] },
+                        { "$mod": [
+                            { "$subtract": [ "$created_at", datetime.datetime(1970, 1, 1) ] },
+                            1000 * 60 * custom_minutes
+                        ]}
+                    ],
                 },
                 "status": "$status",
             },
@@ -41,14 +46,18 @@ def process_query(custom_minutes):
     resultset = {}
     # set first nest for intervals
     for d in columns:
-        resultset[d['_id']['interval']] = {}
+        timestamp = datetime.datetime.utcfromtimestamp(int(d['_id']['interval'])/1000)
+        converted_timestamp = timestamp.strftime('%Y-%m-%d %H:%M')
+        resultset[converted_timestamp] = {}
         
     # set second nest for values per intervals
     for d in columns:
-        if d['_id']['interval'] in resultset:
+        timestamp = datetime.datetime.utcfromtimestamp(int(d['_id']['interval'])/1000)
+        converted_timestamp = timestamp.strftime('%Y-%m-%d %H:%M')
+        if converted_timestamp in resultset:
             if d['status'] == 'success':
-                resultset[d['_id']['interval']]['success'] = d['count']
-            elif d['status'] == 'error':
-                resultset[d['_id']['interval']]['error'] = d['count']
+                resultset[converted_timestamp]['success'] = d['count']
+            if d['status'] == 'error':
+                resultset[converted_timestamp]['error'] = d['count']
 
     return resultset
