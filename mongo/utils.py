@@ -5,43 +5,49 @@ db = client["logs_db"]
 col = db["logs"]
 
 # manually process the data using python.
-def manual_process():
-    final_data = {
-        "1:05": {
-            "success": 0,
-            "error": 0
-        },
-        "1:10": {
-            "success": 0,
-            "error": 0
-        },
-        "1:15": {
-            "success": 0,
-            "error": 0
-        }
-    }
+def process_query(custom_minutes):
+    print(f'custom minutes: {custom_minutes}')
+
+    if isinstance(custom_minutes, str):
+        return False
+
+    # set dict 
+    final_data = {}
+
     # query to get all data
-    data = col.find({})
-    # get start_date for initial checking.
-    start_date = data[0]['created_at']
+    data = col.aggregate([
+        { "$group": {
+            "_id": {
+                "interval": {
+                    "$subtract": [ 
+                    { "$minute": "$created_at" },
+                    { "$mod": [{ "$minute": "$created_at"}, custom_minutes] }
+                    ]
+                },
+                "status": "$status",
+            },
+            "status": { "$addToSet": "$status"},
+            "count": { "$sum": 1}
+        }},
+        {
+            "$unwind": "$status"
+        }
+    ])
 
-    for d in data:
-        check_interval = d['created_at'] - start_date
-        interval = (check_interval.seconds // 60) % 60
-        if interval <= 5:
-            if d['status'] == 'success':
-                final_data["1:05"]["success"] += 1
-            elif d['status'] == 'error':
-                final_data["1:05"]["error"] += 1
-        elif interval >= 5 and interval <=10:
-            if d['status'] == 'success':
-                final_data["1:10"]["success"] += 1
-            elif d['status'] == 'error':
-                final_data["1:10"]["error"] += 1
-        elif interval >= 10 and interval <= 15:
-            if d['status'] == 'success':
-                final_data["1:15"]["success"] += 1
-            elif d['status'] == 'error':
-                final_data["1:15"]["error"] += 1
+    # to make list iterable
+    columns = list(data)
 
-    return final_data
+    resultset = {}
+    # set first nest for intervals
+    for d in columns:
+        resultset[d['_id']['interval']] = {}
+        
+    # set second nest for values per intervals
+    for d in columns:
+        if d['_id']['interval'] in resultset:
+            if d['status'] == 'success':
+                resultset[d['_id']['interval']]['success'] = d['count']
+            elif d['status'] == 'error':
+                resultset[d['_id']['interval']]['error'] = d['count']
+
+    return resultset
